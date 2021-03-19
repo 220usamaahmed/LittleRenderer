@@ -49,6 +49,35 @@ class Canvas:
         self.line(v1, v2, color)
         self.line(v2, v0, color)
 
+    
+    def filled_triangle(self, v0: Tuple[int, int], v1: Tuple[int, int],
+        v2: Tuple[int, int], color: Tuple[int, int, int]):
+        v0, v1, v2 = sorted([v0, v1, v2], key=lambda v: v[1])
+
+        height_v0_v2 = v2[1] - v0[1]
+        height_v0_v1 = v1[1] - v0[1]
+        height_v1_v2 = v2[1] - v1[1]
+
+        if height_v0_v1:
+            for y in range(height_v0_v1):
+                alpha = y / height_v0_v2
+                beta = y / height_v0_v1
+
+                self.line(
+                    (int(v0[0] + alpha * (v2[0] - v0[0])), v0.y + y),
+                    (int(v0[0] + beta * (v1[0] - v0[0])), v0[1] + y),
+                    color)
+        
+        if height_v1_v2:
+            for y in range(height_v1_v2 + 1):
+                alpha = y / height_v0_v2
+                beta = y / height_v1_v2
+
+                self.line(
+                    (int(v2[0] + alpha * (v0[0] - v2[0])), v2[1] - y),
+                    (int(v2[0] + beta * (v1[0] - v2[0])), v2[1] - y),
+                    color)
+
 
     def show(self):
         self.image.show()
