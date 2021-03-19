@@ -43,5 +43,12 @@ class Canvas:
                 error -= dx * 2
 
 
+    def triangle(self, v0: Tuple[int, int], v1: Tuple[int, int],
+        v2: Tuple[int, int], color: Tuple[int, int, int]):
+        self.line(v0, v1, color)
+        self.line(v1, v2, color)
+        self.line(v2, v0, color)
+
+
     def show(self):
         self.image.show()
