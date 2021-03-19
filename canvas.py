@@ -112,6 +112,8 @@ class Canvas:
                     (v01[0], v02[0], v0p[0]),
                     (v01[1], v02[1], v0p[1])
                 )
+                if orthogonal_vector[2] == 0: continue
+
                 barycentric = get_scallar_multiple(orthogonal_vector,
                     1 / orthogonal_vector[2])
                 

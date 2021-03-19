@@ -1,8 +1,9 @@
 from typing import Tuple, List
+import math
 
 
-def get_scallar_multiple(v0: Tuple[float, ...], s: float):
-    return ([c * s for c in v0])
+def get_scallar_multiple(v: Tuple[float, ...], s: float):
+    return tuple([c * s for c in v])
 
 
 def get_direction_vector(v0: Tuple[float, ...], v1: Tuple[float, ...]):
@@ -26,6 +27,16 @@ def get_cross_product(v0: Tuple[float, float, float],
             v0[0] * v1[1] - v0[1] * v1[0]
         )
     else: raise Exception('The two vectors need to be of size 3')
+
+
+def get_magnitude(v: Tuple[float, ...]):
+    return math.sqrt(sum([c**2 for c in v]))
+
+
+def normalize(v: Tuple[float, ...]):
+    mag = get_magnitude(v)
+    if mag == 0: return v
+    else: return get_scallar_multiple(v, 1 / mag)
 
 
 def get_bounding_box(vs: List[Tuple[float, ...]]):
