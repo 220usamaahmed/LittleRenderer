@@ -1,26 +1,29 @@
+from typing import Tuple
+
 from PIL import Image, ImageDraw
 
 class Canvas:
 
-    def __init__(self, dimensions=(512, 512)):
+    def __init__(self, dimensions: Tuple[int, int] = (512, 512)):
         self.dimensions = dimensions
         self.image = Image.new("RGB", dimensions)
         self.imageDraw = ImageDraw.Draw(self.image)
 
 
-    def point(self, v, color):
+    def point(self, v: Tuple[int, int], color: Tuple[int, int, int]):
         x = self.dimensions[0] / 2 + v[0]
         y = self.dimensions[1] / 2 - v[1]
         self.imageDraw.point((x, y), fill=color)
 
 
-    def line(self, v0, v1, color):
+    def line(self, v0: Tuple[int, int], v1: Tuple[int, int],
+        color: Tuple[int, int, int]):
         steep = False
 
         if abs(v0[0] - v1[0]) < abs(v0[1] - v1[1]):
             steep = True
-            v0[0], v0[1] = v0[1], v0[0]
-            v1[0], v1[1] = v1[1], v1[0]
+            v0 = (v0[1], v0[0])
+            v1 = (v1[1], v1[0])
 
         if v0[0] > v1[0]:
             v0, v1 = v1, v0
