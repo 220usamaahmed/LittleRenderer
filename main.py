@@ -2,8 +2,9 @@ from canvas import Canvas
 
 
 def main():
-    canvas = Canvas()    
-    canvas.filled_triangle((0, 100), (100, -50), (-100, -50), (255, 255, 255))
+    canvas = Canvas()
+    canvas.filled_triangle_2((0, 100), (100, -50), (-100, -50), (255, 0, 0))
+    canvas.triangle((0, 100), (100, -50), (-100, -50), (255, 255, 255))
     canvas.show()
 
 

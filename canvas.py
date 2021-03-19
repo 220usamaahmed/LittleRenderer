@@ -1,6 +1,8 @@
 from typing import Tuple
 
 from PIL import Image, ImageDraw
+from vector_utils import *
+
 
 class Canvas:
 
@@ -17,7 +19,11 @@ class Canvas:
 
 
     def line(self, v0: Tuple[int, int], v1: Tuple[int, int],
-        color: Tuple[int, int, int]):
+        color: Tuple[int, int, int]
+    ):
+        """
+        Using Bresenham's line algorithm
+        """
         steep = False
 
         if abs(v0[0] - v1[0]) < abs(v0[1] - v1[1]):
@@ -44,14 +50,19 @@ class Canvas:
 
 
     def triangle(self, v0: Tuple[int, int], v1: Tuple[int, int],
-        v2: Tuple[int, int], color: Tuple[int, int, int]):
+        v2: Tuple[int, int], color: Tuple[int, int, int]
+    ):
         self.line(v0, v1, color)
         self.line(v1, v2, color)
         self.line(v2, v0, color)
 
     
-    def filled_triangle(self, v0: Tuple[int, int], v1: Tuple[int, int],
-        v2: Tuple[int, int], color: Tuple[int, int, int]):
+    def filled_triangle_1(self, v0: Tuple[int, int], v1: Tuple[int, int],
+        v2: Tuple[int, int], color: Tuple[int, int, int]
+    ):
+        """
+        Using Line sweeping algorithm
+        """
         v0, v1, v2 = sorted([v0, v1, v2], key=lambda v: v[1])
 
         height_v0_v2 = v2[1] - v0[1]
@@ -66,7 +77,8 @@ class Canvas:
                 self.line(
                     (int(v0[0] + alpha * (v2[0] - v0[0])), v0.y + y),
                     (int(v0[0] + beta * (v1[0] - v0[0])), v0[1] + y),
-                    color)
+                    color
+                )
         
         if height_v1_v2:
             for y in range(height_v1_v2 + 1):
@@ -76,7 +88,37 @@ class Canvas:
                 self.line(
                     (int(v2[0] + alpha * (v0[0] - v2[0])), v2[1] - y),
                     (int(v2[0] + beta * (v1[0] - v2[0])), v2[1] - y),
-                    color)
+                    color
+                )
+
+
+    def filled_triangle_2(self, v0: Tuple[int, int], v1: Tuple[int, int],
+        v2: Tuple[int, int], color: Tuple[int, int, int]
+    ):
+        """
+        Using barycentric coordinates to determine if pixel is within the 
+        triangle
+        """
+        bounding_box = get_bounding_box([v0, v1, v2])
+        
+        v01 = get_direction_vector(v0, v1)
+        v02 = get_direction_vector(v0, v2)
+        
+        for x in range(bounding_box[0][0], bounding_box[0][1]):
+            for y in range(bounding_box[1][0], bounding_box[1][1]):
+                v0p = get_direction_vector((x, y), v0)
+
+                orthogonal_vector = get_cross_product(
+                    (v01[0], v02[0], v0p[0]),
+                    (v01[1], v02[1], v0p[1])
+                )
+                barycentric = get_scallar_multiple(orthogonal_vector,
+                    1 / orthogonal_vector[2])
+                
+                if (barycentric[0] < 0 or barycentric[1] < 0
+                    or barycentric[2] < 0): continue
+
+                self.point((x, y), color)
 
 
     def show(self):
