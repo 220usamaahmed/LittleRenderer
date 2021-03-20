@@ -2,8 +2,8 @@ from typing import Tuple, List
 import math
 
 
-def get_scallar_multiple(v: Tuple[float, ...], s: float):
-    return tuple([c * s for c in v])
+def scallar_multiply(v: Tuple[float, ...], scallar: float):
+    return tuple([c * scallar for c in v])
 
 
 def get_direction_vector(v0: Tuple[float, ...], v1: Tuple[float, ...]):
@@ -36,7 +36,7 @@ def get_magnitude(v: Tuple[float, ...]):
 def normalize(v: Tuple[float, ...]):
     mag = get_magnitude(v)
     if mag == 0: return v
-    else: return get_scallar_multiple(v, 1 / mag)
+    else: return scallar_multiply(v, 1 / mag)
 
 
 def get_bounding_box(vs: List[Tuple[float, ...]]):

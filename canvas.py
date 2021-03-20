@@ -75,7 +75,7 @@ class Canvas:
                 beta = y / height_v0_v1
 
                 self.line(
-                    (int(v0[0] + alpha * (v2[0] - v0[0])), v0.y + y),
+                    (int(v0[0] + alpha * (v2[0] - v0[0])), v0[1] + y),
                     (int(v0[0] + beta * (v1[0] - v0[0])), v0[1] + y),
                     color
                 )
@@ -114,11 +114,11 @@ class Canvas:
                 )
                 if orthogonal_vector[2] == 0: continue
 
-                barycentric = get_scallar_multiple(orthogonal_vector,
+                barycentric = scallar_multiply(orthogonal_vector,
                     1 / orthogonal_vector[2])
                 
                 if (barycentric[0] < 0 or barycentric[1] < 0
-                    or barycentric[2] < 0): continue
+                    or barycentric[0] + barycentric[1] > 1): continue
 
                 self.point((x, y), color)
 

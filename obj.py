@@ -27,3 +27,8 @@ class OBJ:
                 self.vertices[face[1]],
                 self.vertices[face[2]]
             )
+
+
+    def scale(self, scale_factor):
+        for i in range(len(self.vertices)):
+            self.vertices[i] *= scale_factor
