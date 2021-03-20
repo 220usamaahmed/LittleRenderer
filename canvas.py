@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from PIL import Image, ImageDraw
 from vector_utils import *
@@ -92,21 +92,23 @@ class Canvas:
                 )
 
 
-    def filled_triangle_2(self, v0: Tuple[int, int], v1: Tuple[int, int],
-        v2: Tuple[int, int], color: Tuple[int, int, int]
+    def filled_triangle_2(self, v0: Tuple[int, int, int],
+        v1: Tuple[int, int, int], v2: Tuple[int, int, int],
+        z_buffer: List[List[int]], color: Tuple[int, int, int]
     ):
         """
         Using barycentric coordinates to determine if pixel is within the 
         triangle
         """
+        # TODO Clamp to drawable surface
         bounding_box = get_bounding_box([v0, v1, v2])
         
         v01 = get_direction_vector(v0, v1)
         v02 = get_direction_vector(v0, v2)
         
-        for x in range(bounding_box[0][0], bounding_box[0][1]):
-            for y in range(bounding_box[1][0], bounding_box[1][1]):
-                v0p = get_direction_vector((x, y), v0)
+        for y in range(bounding_box[1][0], bounding_box[1][1] + 1):
+            for x in range(bounding_box[0][0], bounding_box[0][1] + 1):
+                v0p = get_direction_vector((x, y), v0[:2])
 
                 orthogonal_vector = get_cross_product(
                     (v01[0], v02[0], v0p[0]),
@@ -116,9 +118,13 @@ class Canvas:
 
                 barycentric = scallar_multiply(orthogonal_vector,
                     1 / orthogonal_vector[2])
-                
+
                 if (barycentric[0] < 0 or barycentric[1] < 0
                     or barycentric[0] + barycentric[1] > 1): continue
+
+                z = v0[2] + barycentric[0] * v01[2] + barycentric[1] * v02[2]
+                if z < z_buffer[int(self.dimensions[1] / 2) - y - 1][int(self.dimensions[0] / 2) + x - 1]: continue
+                z_buffer[int(self.dimensions[1] / 2) - y - 1][int(self.dimensions[0] / 2) + x - 1] = z
 
                 self.point((x, y), color)
 

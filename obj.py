@@ -31,4 +31,6 @@ class OBJ:
 
     def scale(self, scale_factor):
         for i in range(len(self.vertices)):
-            self.vertices[i] *= scale_factor
+            self.vertices[i][0] *= scale_factor
+            self.vertices[i][1] *= scale_factor
+            self.vertices[i][2] *= scale_factor
