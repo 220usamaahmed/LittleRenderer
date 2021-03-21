@@ -16,6 +16,8 @@ class OBJ:
                 if not len(data): continue
                 if data[0] == 'v':
                     self.vertices.append(list(map(float, data[1:4])))
+                if data[0] == 'vt':
+                    pass
                 if data[0] == 'f':
                     self.faces.append([int(d.split('/')[0]) - 1 for d in data[1:4]])
 
@@ -34,3 +36,10 @@ class OBJ:
             self.vertices[i][0] *= scale_factor
             self.vertices[i][1] *= scale_factor
             self.vertices[i][2] *= scale_factor
+
+
+    def translate(self, translation):
+        for i in range(len(self.vertices)):
+            self.vertices[i][0] += translation[0]
+            self.vertices[i][1] += translation[1]
+            self.vertices[i][2] += translation[2]

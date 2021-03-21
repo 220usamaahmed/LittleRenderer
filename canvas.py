@@ -1,6 +1,7 @@
 from typing import Tuple, List
-
 from PIL import Image, ImageDraw
+
+from obj import OBJ
 from vector_utils import *
 
 
@@ -10,6 +11,9 @@ class Canvas:
         self.dimensions = dimensions
         self.image = Image.new("RGB", dimensions)
         self.imageDraw = ImageDraw.Draw(self.image)
+        self.far_clipping = 256
+        self.z_buffer = [[-self.far_clipping] * self.dimensions[0]
+            for _ in range(self.dimensions[1])]
 
 
     def point(self, v: Tuple[int, int], color: Tuple[int, int, int]):
@@ -61,7 +65,9 @@ class Canvas:
         v2: Tuple[int, int], color: Tuple[int, int, int]
     ):
         """
-        Using Line sweeping algorithm
+        Using Line sweeping algorithm. This function is left here just for
+        reference. It can not be used in a 3D context because it does not take
+        the z-buffer into account when rendering triangles.
         """
         v0, v1, v2 = sorted([v0, v1, v2], key=lambda v: v[1])
 
@@ -92,22 +98,31 @@ class Canvas:
                 )
 
 
+    def render_OBJ(self, object: OBJ):
+        pass
+
+
+
     def filled_triangle_2(self, v0: Tuple[int, int, int],
         v1: Tuple[int, int, int], v2: Tuple[int, int, int],
-        z_buffer: List[List[int]], color: Tuple[int, int, int]
+        color: Tuple[int, int, int]
     ):
         """
         Using barycentric coordinates to determine if pixel is within the 
-        triangle
+        triangle.
         """
         # TODO Clamp to drawable surface
         bounding_box = get_bounding_box([v0, v1, v2])
-        
+        x_start = int(max(bounding_box[0][0], -self.dimensions[0] / 2))
+        x_end = int(min(bounding_box[0][1] + 1, self.dimensions[0] / 2))
+        y_start = int(max(bounding_box[1][0], -self.dimensions[1] / 2))
+        y_end = int(min(bounding_box[1][1] + 1, self.dimensions[1] / 2))
+
         v01 = get_direction_vector(v0, v1)
         v02 = get_direction_vector(v0, v2)
         
-        for y in range(bounding_box[1][0], bounding_box[1][1] + 1):
-            for x in range(bounding_box[0][0], bounding_box[0][1] + 1):
+        for y in range(y_start, y_end):
+            for x in range(x_start, x_end):
                 v0p = get_direction_vector((x, y), v0[:2])
 
                 orthogonal_vector = get_cross_product(
@@ -123,11 +138,21 @@ class Canvas:
                     or barycentric[0] + barycentric[1] > 1): continue
 
                 z = v0[2] + barycentric[0] * v01[2] + barycentric[1] * v02[2]
-                if z < z_buffer[int(self.dimensions[1] / 2) - y - 1][int(self.dimensions[0] / 2) + x - 1]: continue
-                z_buffer[int(self.dimensions[1] / 2) - y - 1][int(self.dimensions[0] / 2) + x - 1] = z
+                y_i = int(self.dimensions[1] / 2) - y - 1
+                x_i = int(self.dimensions[0] / 2) + x - 1
+                if z < self.z_buffer[y_i][x_i]: continue
+                self.z_buffer[y_i][x_i] = z
 
                 self.point((x, y), color)
 
 
     def show(self):
         self.image.show()
+
+
+    def show_z_buffer(self):
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        plt.imshow(np.array(self.z_buffer))
+        plt.show()
