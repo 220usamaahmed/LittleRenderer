@@ -26,7 +26,7 @@ class Canvas:
         color: Tuple[int, int, int]
     ):
         """
-        Using Bresenham's line algorithm
+        Using Bresenham's line drawing algorithm
         """
         steep = False
 
@@ -61,7 +61,7 @@ class Canvas:
         self.line(v2, v0, color)
 
     
-    def filled_triangle_1(self, v0: Tuple[int, int], v1: Tuple[int, int],
+    def filled_triangle(self, v0: Tuple[int, int], v1: Tuple[int, int],
         v2: Tuple[int, int], color: Tuple[int, int, int]
     ):
         """
@@ -98,52 +98,66 @@ class Canvas:
                 )
 
 
-    def render_OBJ(self, object: OBJ):
-        pass
+    def get_calmped_bb(self, vs: List[Tuple[float, ...]]):
+        bounding_box = get_bounding_box(vs)
+        
+        return (
+            int(max(bounding_box[0][0], -self.dimensions[0] / 2)),
+            int(max(bounding_box[1][0], -self.dimensions[1] / 2)),
+            int(min(bounding_box[0][1] + 1, self.dimensions[0] / 2)),
+            int(min(bounding_box[1][1] + 1, self.dimensions[1] / 2))
+        ) 
 
 
-
-    def filled_triangle_2(self, v0: Tuple[int, int, int],
-        v1: Tuple[int, int, int], v2: Tuple[int, int, int],
-        color: Tuple[int, int, int]
-    ):
+    def render_OBJ(self, obj: OBJ):
         """
         Using barycentric coordinates to determine if pixel is within the 
-        triangle.
+        triangle. A z-buffer is used to implement object oclusion.
         """
-        # TODO Clamp to drawable surface
-        bounding_box = get_bounding_box([v0, v1, v2])
-        x_start = int(max(bounding_box[0][0], -self.dimensions[0] / 2))
-        x_end = int(min(bounding_box[0][1] + 1, self.dimensions[0] / 2))
-        y_start = int(max(bounding_box[1][0], -self.dimensions[1] / 2))
-        y_end = int(min(bounding_box[1][1] + 1, self.dimensions[1] / 2))
+        for face in obj.get_faces():
+            v0 = tuple(map(int, face[0]['v']))
+            v1 = tuple(map(int, face[1]['v']))
+            v2 = tuple(map(int, face[2]['v']))
 
-        v01 = get_direction_vector(v0, v1)
-        v02 = get_direction_vector(v0, v2)
-        
-        for y in range(y_start, y_end):
-            for x in range(x_start, x_end):
-                v0p = get_direction_vector((x, y), v0[:2])
+            vt0 = face[0]['vt']
+            vt1 = face[1]['vt']
+            vt2 = face[2]['vt']
 
-                orthogonal_vector = get_cross_product(
-                    (v01[0], v02[0], v0p[0]),
-                    (v01[1], v02[1], v0p[1])
-                )
-                if orthogonal_vector[2] == 0: continue
+            x_start, y_start, x_end, y_end = self.get_calmped_bb([v0, v1, v2])
 
-                barycentric = scallar_multiply(orthogonal_vector,
-                    1 / orthogonal_vector[2])
+            v01 = get_direction_vector(v0, v1)
+            v02 = get_direction_vector(v0, v2)
 
-                if (barycentric[0] < 0 or barycentric[1] < 0
-                    or barycentric[0] + barycentric[1] > 1): continue
+            vt01 = get_direction_vector(vt0, vt1)
+            vt02 = get_direction_vector(vt0, vt2)
 
-                z = v0[2] + barycentric[0] * v01[2] + barycentric[1] * v02[2]
-                y_i = int(self.dimensions[1] / 2) - y - 1
-                x_i = int(self.dimensions[0] / 2) + x - 1
-                if z < self.z_buffer[y_i][x_i]: continue
-                self.z_buffer[y_i][x_i] = z
+            for y in range(y_start, y_end):
+                for x in range(x_start, x_end):
+                    v0p = get_direction_vector((x, y), v0[:2])
 
-                self.point((x, y), color)
+                    orthogonal_vector = get_cross_product(
+                        (v01[0], v02[0], v0p[0]),
+                        (v01[1], v02[1], v0p[1])
+                    )
+                    if orthogonal_vector[2] == 0: continue
+
+                    barycentric = scallar_multiply(orthogonal_vector,
+                        1 / orthogonal_vector[2])
+
+                    if (barycentric[0] < 0 or barycentric[1] < 0
+                        or barycentric[0] + barycentric[1] > 1): continue
+
+                    z = (v0[2] + barycentric[0] * v01[2]
+                        + barycentric[1] * v02[2])
+                    y_i = int(self.dimensions[1] / 2) - y - 1
+                    x_i = int(self.dimensions[0] / 2) + x - 1
+                    if z < self.z_buffer[y_i][x_i]: continue
+                    self.z_buffer[y_i][x_i] = z
+
+                    vtx = vt0[0] + barycentric[0] * vt01[0] + barycentric[1] * vt02[0]
+                    vty = vt0[1] + barycentric[0] * vt01[1] + barycentric[1] * vt02[1]
+
+                    self.point((x, y), obj.get_texture(vtx, vty))
 
 
     def show(self):

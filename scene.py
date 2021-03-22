@@ -18,20 +18,21 @@ class Scene:
 
     def render(self):
         for obj in self.objects:
-            for face in obj.get_faces():
-                v0 = (int(face[0][0]), int(face[0][1]), int(face[0][2]))
-                v1 = (int(face[1][0]), int(face[1][1]), int(face[1][2]))
-                v2 = (int(face[2][0]), int(face[2][1]), int(face[2][2]))
+            self.canvas.render_OBJ(obj)
+            # for face in obj.get_faces():
+            #     v0 = tuple(map(int, face[0]['v']))
+            #     v1 = tuple(map(int, face[1]['v']))
+            #     v2 = tuple(map(int, face[2]['v']))
 
-                v01 = get_direction_vector(v0, v1)
-                v02 = get_direction_vector(v0, v2)
+            #     v01 = get_direction_vector(v0, v1)
+            #     v02 = get_direction_vector(v0, v2)
 
-                face_normal = get_cross_product(v01, v02)
-                face_normal = normalize(face_normal)
-                orientation = get_dot_product(face_normal, (0, 0, 1))
+            #     face_normal = get_cross_product(v01, v02)
+            #     face_normal = normalize(face_normal)
+            #     orientation = get_dot_product(face_normal, (0, 0, 1))
 
-                self.canvas.filled_triangle_2(v0, v1, v2,
-                    tuple([int(orientation * 255)] * 3))
+            #     self.canvas.filled_triangle_2(v0, v1, v2,
+            #         tuple([int(orientation * 255)] * 3))
 
 
     def show(self):
