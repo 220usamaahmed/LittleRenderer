@@ -24,6 +24,13 @@ class OBJ:
         self.texture_map = image.load()
         self.texture_map_size = image.size
 
+        for i in range(len(self.texture_coordinates)):
+            self.texture_coordinates[i][0] = int(self.texture_coordinates[i][0]
+                * self.texture_map_size[0])
+            self.texture_coordinates[i][1] = int(self.texture_coordinates[i][1]
+                * self.texture_map_size[1])
+
+
 
     def read_file(self):
         with open(self.filepath, 'r') as file:
@@ -34,7 +41,7 @@ class OBJ:
                     self.vertices.append(list(map(float, data[1:4])))
                 if data[0] == 'vt':
                     self.texture_coordinates.append(
-                        tuple(map(float, data[1:4]))
+                        list(map(float, data[1:4]))
                     )
                 if data[0] == 'f':
                     self.faces.append(
@@ -54,9 +61,6 @@ class OBJ:
     def get_texture(self, x, y):
         if self.texture_map == None:
             raise Exception("Texture map not loaded for object")
-        
-        x = int(x * self.texture_map_size[0])
-        y = int(y * self.texture_map_size[1])
 
         if (0 <= x < self.texture_map_size[0] 
             and 0 <= y < self.texture_map_size[1]):
