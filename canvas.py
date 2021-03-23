@@ -106,7 +106,12 @@ class Canvas:
             int(max(bounding_box[1][0], -self.dimensions[1] / 2)),
             int(min(bounding_box[0][1] + 1, self.dimensions[0] / 2)),
             int(min(bounding_box[1][1] + 1, self.dimensions[1] / 2))
-        ) 
+        )
+
+
+    def apply_perspective(self, v, c):
+        divisor = 1 - v[2] / c
+        return (v[0] / divisor, v[1] / divisor, v[2] / divisor)
 
 
     def render_OBJ(self, obj: OBJ):
@@ -115,9 +120,13 @@ class Canvas:
         triangle. A z-buffer is used to implement object oclusion.
         """
         for face in obj.get_faces():
-            v0 = tuple(map(int, face[0]['v']))
-            v1 = tuple(map(int, face[1]['v']))
-            v2 = tuple(map(int, face[2]['v']))
+            v0 = self.apply_perspective(face[0]['v'], 2)
+            v1 = self.apply_perspective(face[1]['v'], 2)
+            v2 = self.apply_perspective(face[2]['v'], 2)
+
+            v0 = scallar_multiply(v0, 256)
+            v1 = scallar_multiply(v1, 256)
+            v2 = scallar_multiply(v2, 256)
 
             vt0 = face[0]['vt']
             vt1 = face[1]['vt']
