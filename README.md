@@ -1,1 +1,3 @@
-# lil-renderer-v2
+# LittleRenderer
+
+A simple rasterizer.
