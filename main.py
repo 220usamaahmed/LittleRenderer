@@ -1,29 +1,25 @@
-from scene import Scene
-from obj import OBJ
+import numpy as np
 
-import random
+from src.scene import Scene
+from src.obj import OBJ
+from src.camera import PerspectiveCamera
+from src.rasterizer import Rasterizer
+from src.image_utils import show_image
 
 
 def main():
-    
-    scene = Scene((640, 640))
-    
-    obj1 = OBJ('./test_models/african_head/african_head.obj')
-    obj1.load_texture_map('./test_models/african_head/african_head_diffuse.jpg')
-    scene.add_object(obj1)
+    camera = PerspectiveCamera(0.2, 10, np.pi / 2)
+    # camera.translate(0.5, 0.5, 0)
+    scene = Scene(camera, 512)
 
-    # obj2 = OBJ('./test_models/african_head/african_head.obj')
-    # obj2.load_texture_map('./test_models/african_head/african_head_diffuse.jpg')
-    # scene.add_object(obj2)
+    obj1 = OBJ('test_models/african_head/african_head.obj')
+    obj1.load_texture_map('test_models/african_head/african_head_diffuse.jpg')
+    obj1.load_normal_map('test_models/african_head/african_head_nm.jpg')
+    obj1.load_specular_map('test_models/african_head/african_head_spec.jpg')
+    obj1.translate(0, 0, -1.5)
+    scene.add_obj(obj1)
 
-    # diablo_3_pose = OBJ('./test_models/diablo3_pose/diablo3_pose.obj')
-    # diablo_3_pose.load_texture_map('./test_models/diablo3_pose/diablo3_pose_diffuse.jpg')
-    # scene.add_object(diablo_3_pose)
-
-    
     scene.render()
-    scene.show()
-    # scene.show_z_buffer()
 
 
-if __name__ == "__main__": main()
+if __name__ == '__main__': main()
